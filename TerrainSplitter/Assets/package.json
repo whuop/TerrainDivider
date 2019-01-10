@@ -1,1 +1,27 @@
-{"name":"com.landfall.terraindivider","displayName":"Terrain Divider","version":"0.0.3","unity":"2018.3","description":"A tool for unity that splits terrain into smaller chunks of a given size.","category":"Unity","keywords":["terrain","split","divide","chunk"]}
+{
+  "name": "com.landfall.terrain-divider",
+  "author": {
+    "name": "Kristian Brodal",
+    "email": "brodal@landfall.se",
+    "url": "http://www.landfall.se"
+  },
+  "contributors": [],
+  "displayName": "Terrain Divider",
+  "version": "0.0.2",
+  "unity": "2018.3",
+  "description": "A tool for Unity that divides terrain into smaller chunks of a given size.",
+  "category": "Unity",
+  "keywords": [
+    "tool",
+    "terrain",
+    "divide",
+    "split"
+  ],
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/whuop/TerrainDivider.git"
+  },
+  "dependencies": {
+    "com.landfall.path-utilities": "0.0.2"
+  }
+}
