@@ -9,7 +9,7 @@
     }
   ],
   "dependencies": {
-    "com.landfall.package-publisher": "0.1.4",
+    "com.landfall.package-publisher": "0.1.6",
     "com.landfall.path-utilities": "0.0.2",
     "com.unity.package-manager-ui": "2.0.3"
   }
