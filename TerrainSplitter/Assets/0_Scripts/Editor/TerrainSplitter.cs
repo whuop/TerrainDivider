@@ -256,6 +256,9 @@ namespace Landfall.Editor
             }
             td.splatPrototypes = splats;
 
+            td.alphamapResolution = alphamapResolution;
+            td.SetDetailResolution(detailResolution, 8);
+
             //  Grass
             td.wavingGrassAmount = origTerrain.terrainData.wavingGrassAmount;
             td.wavingGrassSpeed = origTerrain.terrainData.wavingGrassSpeed;
@@ -287,6 +290,9 @@ namespace Landfall.Editor
             // Height
             //Vector2 newTerrainSize = new Vector2(xMax - xMin, zMax - zMin);
             CalculateSubHeightmap(td, heightmapResolution, origTerrain, chunkOffsetX, chunkOffsetZ, chunkWidthRatio, chunkDepthRatio, chunkX, chunkZ);
+
+            // Must happen after setting heightmapResolution
+            td.size = new Vector3(xMax - xMin, origTerrain.terrainData.size.y, zMax - zMin);
 
             // Splat
             CalculateSubSplatmaps(td, origTerrain, alphamapResolution, chunkX, chunkZ, startSamples, endSamples, chunkWidthRatio, chunkDepthRatio, chunkOffsetX, chunkOffsetZ);
@@ -325,8 +331,7 @@ namespace Landfall.Editor
             gameObject.transform.position = new Vector3(origTerrain.transform.position.x + xMin, origTerrain.transform.position.y, origTerrain.transform.position.z + zMin);
             gameObject.name = newName;
 
-            // Must happen after setting heightmapResolution
-            td.size = new Vector3(xMax - xMin, origTerrain.terrainData.size.y, zMax - zMin);
+            
 
             AssetDatabase.SaveAssets();
 
@@ -391,6 +396,7 @@ namespace Landfall.Editor
 
             Debug.LogError("Sample Scale Ratio: " + dstSampleToSrcSampleRatio.x + "/" + dstSampleToSrcSampleRatio.y);
 
+            
             for (int i = 0; i < sourceSplats.GetLength(2); i++)
             {
                 for (int x = 0; x < splatmapResolution; x++)
@@ -400,30 +406,36 @@ namespace Landfall.Editor
                         float srcPositionX = chunkOffsetX + (x * dstSampleToSrcSampleRatio.x);
                         float srcPositionZ = chunkOffsetZ + (z * dstSampleToSrcSampleRatio.y);
 
-                        int posX = Mathf.RoundToInt(srcPositionX);
-                        int posZ = Mathf.RoundToInt(srcPositionZ);
+                        srcPositionX *= origTerrain.terrainData.alphamapWidth;
+                        srcPositionZ *= origTerrain.terrainData.alphamapHeight;
+
+                        int posX = Mathf.FloorToInt(srcPositionX);
+                        int posZ = Mathf.FloorToInt(srcPositionZ);
 
                         float valAtPos = sourceSplats[posX, posZ, i];
+                        float valAtNextX = sourceSplats[posX + 1, posZ, i];
+                        float valatNextZ = sourceSplats[posX, posZ + 1, i];
+                        float valAtNextXZ = sourceSplats[posX + 1, posZ + 1, i];
 
-                        // MÅSTE TÄNKA OM ALGORITMEN. Måste translera positionerna till sample space igen ( inte normaliserat ), just nu är alla värden i sample space ( normaliserat ).
+                        float remainderX = srcPositionX - (float)posX;
+                        float remainderZ = srcPositionZ - (float)posZ;
 
-                        //float lengthToNextX = srcPositionX - Mathf.Floor(srcPositionX);
-                        //float lengthToNextZ = srcPositionZ - Mathf.Floor(srcPositionZ);
+                        float lengthToX = remainderX;
+                        float lengthToZ = remainderZ;    
+                        float lengthToXZ = new Vector2(lengthToX, lengthToZ).magnitude;
 
+                        float newValueX = Mathf.Lerp(valAtPos, valAtNextX, lengthToX);
+                        float newValueZ = Mathf.Lerp(newValueX, valatNextZ, lengthToZ);
+                        float newValueXZ = Mathf.Lerp(newValueZ, valAtNextXZ, lengthToXZ);
 
-                        //if (x == 0 || z == 0 || x == splatmapResolution - 1 || z == splatmapResolution - 1)
-                        //{
-                        Debug.Log("Source Sample X/Z: " + x + "/" + z);
-                        Debug.Log("Target Sample X/Z/Val: " + srcPositionX + "/" + srcPositionZ + "/" + valAtPos);
-                        Debug.Log("Ratio X/Z: " + dstSampleToSrcSampleRatio.x + "/" + dstSampleToSrcSampleRatio.y);
-                        //}
+                        float finalVal = newValueXZ;
+                        destSplats[x, z, i] = finalVal;
+                        
                     }
                 }
             }
 
-
-
-            //newTerrainData.SetAlphamaps(0, 0, newAlphamaps);
+            newTerrainData.SetAlphamaps(0, 0, destSplats);
         }
 
         public static int NearestPoT(int num)

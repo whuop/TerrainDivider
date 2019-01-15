@@ -9,8 +9,11 @@
     }
   ],
   "dependencies": {
-    "com.landfall.package-publisher": "0.1.6",
+    "com.landfall.package-publisher": "0.1.7",
     "com.landfall.path-utilities": "0.0.2",
-    "com.unity.package-manager-ui": "2.0.3"
+    "com.unity.package-manager-ui": "2.0.3",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.terrain": "1.0.0",
+    "com.unity.modules.terrainphysics": "1.0.0"
   }
 }

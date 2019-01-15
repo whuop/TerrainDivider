@@ -1,0 +1,5 @@
+# Ignore Everything
+/*
+/.*
+# Make exceptions to the rule
+!/0_Scripts/*
