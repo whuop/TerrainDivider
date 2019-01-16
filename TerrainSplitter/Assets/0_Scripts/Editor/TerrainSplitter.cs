@@ -92,14 +92,20 @@ namespace Landfall.Editor
                     int detailResolution = Mathf.RoundToInt((float)origTerrain.terrainData.detailResolution * chunkSizeRatio);
                     detailResolution = NearestPoT(detailResolution);
 
+                    int basemapResolution = Mathf.RoundToInt((float)origTerrain.terrainData.baseMapResolution * chunkSizeRatio);
+                    basemapResolution = NearestPoT(basemapResolution);
+
+                    
+
                     //  Switched X for Z in CopyTerrain. Not really sure why that has to be done currently, but if i dont everything is mirrored all weird, so i think it's just that the 
                     //  x and z index of the loop does not correspond to the order they are being looped.
-                    var terrainChunk = CopyTerrain(origTerrain, string.Format("{0}{1}_{2}", origTerrain.name, x, z), terrainSavePath, xMin, xMax, zMin, zMax, heightmapResolution, detailResolution, splatResolution, chunkOffsetX, chunkOffsetZ, chunkWidthRatio, chunkDepthRatio, x, z);
+                    var terrainChunk = CopyTerrain(origTerrain, string.Format("{0}{1}_{2}", origTerrain.name, x, z), terrainSavePath, xMin, xMax, zMin, zMax, heightmapResolution, detailResolution, splatResolution, basemapResolution, chunkOffsetX, chunkOffsetZ, chunkWidthRatio, chunkDepthRatio, x, z);
                     terrains.Add(terrainChunk);
 
                     Debug.LogError("Heightmap Resolution: " + heightmapResolution);
                     Debug.LogError("Splat Resolution: " + splatResolution);
                     Debug.LogError("Detail Resolution: " + detailResolution);
+                    Debug.LogError("Basemap Resolution: " + basemapResolution);
 
 
 
@@ -150,7 +156,7 @@ namespace Landfall.Editor
             return terrains;
         }
 
-        static Terrain CopyTerrain(Terrain origTerrain, string newName, string savePath, float xMin, float xMax, float zMin, float zMax, int heightmapResolution, int detailResolution, int alphamapResolution, float chunkOffsetX, float chunkOffsetZ, float chunkWidthRatio, float chunkDepthRatio, int chunkX, int chunkZ)
+        static Terrain CopyTerrain(Terrain origTerrain, string newName, string savePath, float xMin, float xMax, float zMin, float zMax, int heightmapResolution, int detailResolution, int alphamapResolution, int basemapResolution, float chunkOffsetX, float chunkOffsetZ, float chunkWidthRatio, float chunkDepthRatio, int chunkX, int chunkZ)
         {
             if (heightmapResolution < 33 || heightmapResolution > 4097)
             {
@@ -258,6 +264,7 @@ namespace Landfall.Editor
 
             td.alphamapResolution = alphamapResolution;
             td.SetDetailResolution(detailResolution, 8);
+            td.baseMapResolution = basemapResolution;
 
             //  Grass
             td.wavingGrassAmount = origTerrain.terrainData.wavingGrassAmount;
@@ -294,8 +301,10 @@ namespace Landfall.Editor
             // Must happen after setting heightmapResolution
             td.size = new Vector3(xMax - xMin, origTerrain.terrainData.size.y, zMax - zMin);
 
-            // Splat
-            CalculateSubSplatmaps(td, origTerrain, alphamapResolution, chunkX, chunkZ, startSamples, endSamples, chunkWidthRatio, chunkDepthRatio, chunkOffsetX, chunkOffsetZ);
+            // Calculate sub splat map
+            CalculateSubSplatmaps(td, origTerrain, alphamapResolution, startSamples, endSamples, chunkWidthRatio, chunkDepthRatio, chunkOffsetX, chunkOffsetZ);
+
+            //  Calculate sub detail map
 
             // Detail
             /*td.SetDetailResolution(detailResolution, 8); // Default? Haven't messed with resolutionPerPatch
@@ -331,10 +340,12 @@ namespace Landfall.Editor
             gameObject.transform.position = new Vector3(origTerrain.transform.position.x + xMin, origTerrain.transform.position.y, origTerrain.transform.position.z + zMin);
             gameObject.name = newName;
 
-            
+            newTerrain.ApplyDelayedHeightmapModification();
+            td.SetBaseMapDirty();
 
             AssetDatabase.SaveAssets();
 
+            AssetDatabase.Refresh();
             return newTerrain;
         }
 
@@ -367,7 +378,7 @@ namespace Landfall.Editor
             newTerrainData.SetHeightsDelayLOD(0, 0, newHeights);
         }
 
-        private static void CalculateSubSplatmaps(TerrainData newTerrainData, Terrain origTerrain, int splatmapResolution, int chunkX, int chunkZ, Vector2 startSamples, Vector2 endSamples, float chunkWidthRatio, float chunkDepthRatio, float chunkOffsetX, float chunkOffsetZ)
+        private static void CalculateSubSplatmaps(TerrainData newTerrainData, Terrain origTerrain, int splatmapResolution, Vector2 startSamples, Vector2 endSamples, float chunkWidthRatio, float chunkDepthRatio, float chunkOffsetX, float chunkOffsetZ)
         {
             //  Get the splat map from the larger source terrain.
             var sourceSplats = origTerrain.terrainData.GetAlphamaps(0, 0, origTerrain.terrainData.alphamapWidth, origTerrain.terrainData.alphamapHeight);
@@ -436,6 +447,12 @@ namespace Landfall.Editor
             }
 
             newTerrainData.SetAlphamaps(0, 0, destSplats);
+        }
+
+        private static void CalculateDetailMap(TerrainData newTerrain, Terrain origTerrain, int detailResolution)
+        {
+            //  Get the detail map from the larger source terrain
+            //var sourceDetail = origTerrain.terrainData.get
         }
 
         public static int NearestPoT(int num)
