@@ -77,7 +77,7 @@ namespace Landfall.Editor
 
                     float chunkWidthRatio = cSizeX / origTerrain.terrainData.size.x;
                     float chunkDepthRatio = cSizeZ / origTerrain.terrainData.size.z;
-
+                    
                     float chunkSizeRatio = (chunkWidthRatio > chunkDepthRatio) ? chunkWidthRatio : chunkDepthRatio;
 
                     Debug.LogError("Largest Percent: " + chunkSizeRatio);
@@ -392,6 +392,8 @@ namespace Landfall.Editor
             float sampleSizeNormalizedX = chunkWidthRatio / ((float)splatmapResolution);
             float sampleSizeNormalizedZ = chunkDepthRatio / ((float)splatmapResolution);
 
+            Debug.Log("Check: " + (32 * sampleSizeNormalizedX) * origTerrain.terrainData.alphamapWidth);
+
             /*Debug.LogError("Splat Res: " + splatmapResolution);
             Debug.LogError("ChunkWidthR: " + chunkWidthRatio);
             Debug.LogError("ChunkDepthR: " + chunkDepthRatio);
@@ -409,9 +411,9 @@ namespace Landfall.Editor
             
             for (int i = 0; i < sourceSplats.GetLength(2); i++)
             {
-                for (int z = 0; z < splatmapResolution; z++)
+                for (int x = 0; x < splatmapResolution; x++)
                 {
-                    for (int x = 0; x < splatmapResolution; x++)
+                    for (int z = 0; z < splatmapResolution; z++)
                     {
                         float srcPositionX = chunkOffsetX + (z * dstSampleToSrcSampleRatio.x);
                         float srcPositionZ = chunkOffsetZ + (x * dstSampleToSrcSampleRatio.y);
@@ -444,13 +446,17 @@ namespace Landfall.Editor
 
                         //  Try a new interpolation down the line where it starts at the center of the grid instead and interpolates 4 times against the corner,
                         //  instead of the current one which interpolates from the bottom left corner towards the other 4 corners. 
+
+                        /*float newValueX = Mathf.Lerp(valAtNextXZ, valatNextZ, remainderZ);
+                        float newValueZ = Mathf.Lerp(newValueX, valAtNextX, remainderX);
+                        float newValueXZ = Mathf.Lerp(newValueZ, valAtPos, lengthToXZ);*/
+
                         float newValueX = Mathf.Lerp(valAtPos, valAtNextX, lengthToX);
                         float newValueZ = Mathf.Lerp(newValueX, valatNextZ, lengthToZ);
                         float newValueXZ = Mathf.Lerp(newValueZ, valAtNextXZ, lengthToXZ);
 
                         float finalVal = newValueXZ;
                         destSplats[x, z, i] = finalVal;
-                        
                     }
                 }
             }
