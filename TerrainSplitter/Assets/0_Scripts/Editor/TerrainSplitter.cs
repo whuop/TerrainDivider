@@ -38,9 +38,6 @@ namespace Landfall.Editor
             float totalAllotedSizeX = origTerrain.terrainData.size.x;
             float totalAllotedSizeZ = origTerrain.terrainData.size.z;
 
-            int numChunksX = Mathf.FloorToInt(totalAllotedSizeX / (float)chunkSizeX);
-            int numChunksZ = Mathf.FloorToInt(totalAllotedSizeZ / (float)chunkSizeZ);
-
             float totalTakenX = 0.0f;
             float totalTakenZ = 0.0f;
 
@@ -415,8 +412,8 @@ namespace Landfall.Editor
                 {
                     for (int z = 0; z < splatmapResolution; z++)
                     {
-                        float srcPositionX = chunkOffsetX + (z * dstSampleToSrcSampleRatio.x);
-                        float srcPositionZ = chunkOffsetZ + (x * dstSampleToSrcSampleRatio.y);
+                        float srcPositionX = chunkOffsetX + (x * dstSampleToSrcSampleRatio.x);
+                        float srcPositionZ = chunkOffsetZ + (z * dstSampleToSrcSampleRatio.y);
 
                         srcPositionX *= origTerrain.terrainData.alphamapWidth;
                         srcPositionZ *= origTerrain.terrainData.alphamapHeight;
@@ -454,9 +451,11 @@ namespace Landfall.Editor
                         float newValueX = Mathf.Lerp(valAtPos, valAtNextX, lengthToX);
                         float newValueZ = Mathf.Lerp(newValueX, valatNextZ, lengthToZ);
                         float newValueXZ = Mathf.Lerp(newValueZ, valAtNextXZ, lengthToXZ);
+                        //float finalVal = Mathf.Lerp(newValueXZ, valAtPos, (1.0f - lengthToXZ));
 
                         float finalVal = newValueXZ;
-                        destSplats[x, z, i] = finalVal;
+                        //float finalVal = valAtPos;
+                        destSplats[z, x, i] = finalVal;
                     }
                 }
             }
