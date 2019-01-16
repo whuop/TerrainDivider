@@ -179,7 +179,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &949656120
 PrefabInstance:
@@ -188,6 +188,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2024599505443640323, guid: 337d1231e53d88d489104240ebba04e6,
+        type: 3}
+      propertyPath: m_SplatMapDistance
+      value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 2024599505443640323, guid: 337d1231e53d88d489104240ebba04e6,
+        type: 3}
+      propertyPath: m_HeightmapPixelError
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 93150324009789836, guid: 337d1231e53d88d489104240ebba04e6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4573954119040349722, guid: 337d1231e53d88d489104240ebba04e6,
         type: 3}
       propertyPath: m_Name
@@ -356,7 +371,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1125402711
 MonoBehaviour:

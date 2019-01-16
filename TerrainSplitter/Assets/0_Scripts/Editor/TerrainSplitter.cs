@@ -125,7 +125,6 @@ namespace Landfall.Editor
                         float[,] dstAlphamap = new float[splatResolution, splatResolution];
                         FloatArrayRescaler.RescaleArray(resizeMap, dstAlphamap);
                     }*/
-                    return terrains;
                     z++;
                 }
 
@@ -393,40 +392,48 @@ namespace Landfall.Editor
             float sampleSizeNormalizedX = chunkWidthRatio / ((float)splatmapResolution);
             float sampleSizeNormalizedZ = chunkDepthRatio / ((float)splatmapResolution);
 
-            Debug.LogError("Splat Res: " + splatmapResolution);
+            /*Debug.LogError("Splat Res: " + splatmapResolution);
             Debug.LogError("ChunkWidthR: " + chunkWidthRatio);
             Debug.LogError("ChunkDepthR: " + chunkDepthRatio);
 
             Debug.LogError("SrcSampples X/Z: " + srcSamplesX + "/" + srcSAmplesZ);
-            Debug.LogError("Dst Samples: " + splatmapResolution);
+            Debug.LogError("Dst Samples: " + splatmapResolution);*/
 
             Vector2 dstSampleToSrcSampleRatio = new Vector2(
                 sampleSizeNormalizedX,
                 sampleSizeNormalizedZ
                 );
 
-            Debug.LogError("Sample Scale Ratio: " + dstSampleToSrcSampleRatio.x + "/" + dstSampleToSrcSampleRatio.y);
+            //Debug.LogError("Sample Scale Ratio: " + dstSampleToSrcSampleRatio.x + "/" + dstSampleToSrcSampleRatio.y);
 
             
             for (int i = 0; i < sourceSplats.GetLength(2); i++)
             {
-                for (int x = 0; x < splatmapResolution; x++)
+                for (int z = 0; z < splatmapResolution; z++)
                 {
-                    for (int z = 0; z < splatmapResolution; z++)
+                    for (int x = 0; x < splatmapResolution; x++)
                     {
-                        float srcPositionX = chunkOffsetX + (x * dstSampleToSrcSampleRatio.x);
-                        float srcPositionZ = chunkOffsetZ + (z * dstSampleToSrcSampleRatio.y);
+                        float srcPositionX = chunkOffsetX + (z * dstSampleToSrcSampleRatio.x);
+                        float srcPositionZ = chunkOffsetZ + (x * dstSampleToSrcSampleRatio.y);
 
                         srcPositionX *= origTerrain.terrainData.alphamapWidth;
                         srcPositionZ *= origTerrain.terrainData.alphamapHeight;
 
-                        int posX = Mathf.FloorToInt(srcPositionX);
-                        int posZ = Mathf.FloorToInt(srcPositionZ);
+                        int posZ = Mathf.FloorToInt(srcPositionX);
+                        int posX = Mathf.FloorToInt(srcPositionZ);
 
                         float valAtPos = sourceSplats[posX, posZ, i];
-                        float valAtNextX = sourceSplats[posX + 1, posZ, i];
-                        float valatNextZ = sourceSplats[posX, posZ + 1, i];
-                        float valAtNextXZ = sourceSplats[posX + 1, posZ + 1, i];
+                        float valAtNextX = sourceSplats[posX, posZ, i];
+                        if ((posX + 1) < sourceSplats.GetLength(0))
+                            valAtNextX = sourceSplats[posX + 1, posZ, i];
+
+                        float valatNextZ = sourceSplats[posX, posZ, i];
+                        if ((posZ + 1) < sourceSplats.GetLength(1))
+                            valatNextZ = sourceSplats[posX, posZ + 1, i];
+
+                        float valAtNextXZ = sourceSplats[posX, posZ, i];
+                        if ((posX + 1) < sourceSplats.GetLength(0) && (posZ + 1) < sourceSplats.GetLength(1))
+                            valAtNextXZ = sourceSplats[posX + 1, posZ + 1, i];
 
                         float remainderX = srcPositionX - (float)posX;
                         float remainderZ = srcPositionZ - (float)posZ;
@@ -435,6 +442,8 @@ namespace Landfall.Editor
                         float lengthToZ = remainderZ;    
                         float lengthToXZ = new Vector2(lengthToX, lengthToZ).magnitude;
 
+                        //  Try a new interpolation down the line where it starts at the center of the grid instead and interpolates 4 times against the corner,
+                        //  instead of the current one which interpolates from the bottom left corner towards the other 4 corners. 
                         float newValueX = Mathf.Lerp(valAtPos, valAtNextX, lengthToX);
                         float newValueZ = Mathf.Lerp(newValueX, valatNextZ, lengthToZ);
                         float newValueXZ = Mathf.Lerp(newValueZ, valAtNextXZ, lengthToXZ);
@@ -453,6 +462,7 @@ namespace Landfall.Editor
         {
             //  Get the detail map from the larger source terrain
             //var sourceDetail = origTerrain.terrainData.get
+            float aVal = 10;
         }
 
         public static int NearestPoT(int num)
