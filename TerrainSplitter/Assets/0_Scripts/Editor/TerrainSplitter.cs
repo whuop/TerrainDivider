@@ -292,7 +292,7 @@ namespace Landfall.Editor
 
             // Height
             //Vector2 newTerrainSize = new Vector2(xMax - xMin, zMax - zMin);
-            CalculateSubHeightmap(td, heightmapResolution, origTerrain, chunkOffsetX, chunkOffsetZ, chunkWidthRatio, chunkDepthRatio, chunkX, chunkZ);
+            CalculateSubHeightmap(td, heightmapResolution, origTerrain, chunkOffsetX, chunkOffsetZ, chunkWidthRatio, chunkDepthRatio);
 
             // Must happen after setting heightmapResolution
             td.size = new Vector3(xMax - xMin, origTerrain.terrainData.size.y, zMax - zMin);
@@ -345,7 +345,7 @@ namespace Landfall.Editor
             return newTerrain;
         }
 
-        private static void CalculateSubHeightmap(TerrainData newTerrainData, int heightmapResolution, Terrain origTerrain, float chunkOffsetX, float chunkOffsetZ, float chunkWidthRatio, float chunkDepthRatio, int chunkX, int chunkZ)
+        private static void CalculateSubHeightmap(TerrainData newTerrainData, int heightmapResolution, Terrain origTerrain, float chunkOffsetX, float chunkOffsetZ, float chunkWidthRatio, float chunkDepthRatio)
         {
             newTerrainData.heightmapResolution = heightmapResolution;
             float[,] newHeights = new float[heightmapResolution, heightmapResolution];
@@ -388,23 +388,11 @@ namespace Landfall.Editor
 
             float sampleSizeNormalizedX = chunkWidthRatio / ((float)splatmapResolution);
             float sampleSizeNormalizedZ = chunkDepthRatio / ((float)splatmapResolution);
-
-            Debug.Log("Check: " + (32 * sampleSizeNormalizedX) * origTerrain.terrainData.alphamapWidth);
-
-            /*Debug.LogError("Splat Res: " + splatmapResolution);
-            Debug.LogError("ChunkWidthR: " + chunkWidthRatio);
-            Debug.LogError("ChunkDepthR: " + chunkDepthRatio);
-
-            Debug.LogError("SrcSampples X/Z: " + srcSamplesX + "/" + srcSAmplesZ);
-            Debug.LogError("Dst Samples: " + splatmapResolution);*/
-
+            
             Vector2 dstSampleToSrcSampleRatio = new Vector2(
                 sampleSizeNormalizedX,
                 sampleSizeNormalizedZ
                 );
-
-            //Debug.LogError("Sample Scale Ratio: " + dstSampleToSrcSampleRatio.x + "/" + dstSampleToSrcSampleRatio.y);
-
             
             for (int i = 0; i < sourceSplats.GetLength(2); i++)
             {
@@ -440,21 +428,13 @@ namespace Landfall.Editor
                         float lengthToX = remainderX;
                         float lengthToZ = remainderZ;    
                         float lengthToXZ = new Vector2(lengthToX, lengthToZ).magnitude;
-
-                        //  Try a new interpolation down the line where it starts at the center of the grid instead and interpolates 4 times against the corner,
-                        //  instead of the current one which interpolates from the bottom left corner towards the other 4 corners. 
-
-                        /*float newValueX = Mathf.Lerp(valAtNextXZ, valatNextZ, remainderZ);
-                        float newValueZ = Mathf.Lerp(newValueX, valAtNextX, remainderX);
-                        float newValueXZ = Mathf.Lerp(newValueZ, valAtPos, lengthToXZ);*/
-
+                        
+                        //  Interpolate corner values
                         float newValueX = Mathf.Lerp(valAtPos, valAtNextX, lengthToX);
                         float newValueZ = Mathf.Lerp(newValueX, valatNextZ, lengthToZ);
                         float newValueXZ = Mathf.Lerp(newValueZ, valAtNextXZ, lengthToXZ);
-                        //float finalVal = Mathf.Lerp(newValueXZ, valAtPos, (1.0f - lengthToXZ));
-
+                        
                         float finalVal = newValueXZ;
-                        //float finalVal = valAtPos;
                         destSplats[z, x, i] = finalVal;
                     }
                 }
@@ -463,11 +443,11 @@ namespace Landfall.Editor
             newTerrainData.SetAlphamaps(0, 0, destSplats);
         }
 
-        private static void CalculateDetailMap(TerrainData newTerrain, Terrain origTerrain, int detailResolution)
+        private static void CalculateDetailMap(TerrainData newTerrainData, int detailResolution, Terrain origTerrain, float chunkOffsetX, float chunkOffsetZ, float chunkWidthRatio, float chunkDepthRatio)
         {
             //  Get the detail map from the larger source terrain
             //var sourceDetail = origTerrain.terrainData.get
-            float aVal = 10;
+            
         }
 
         public static int NearestPoT(int num)
